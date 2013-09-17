@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_grid"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <FrameLayout
+        android:id="@+id/frame_grid" 
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true">
+    <ImageView 
+        android:id="@+id/img_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        android:contentDescription="@null"/>
+    <ImageView 
+        android:id="@+id/img_status_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:src="@drawable/newtag"
+        android:visibility="invisible"
+        android:contentDescription="@null"/>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/txt_grid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/frame_grid"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:ellipsize="end"
+        android:gravity="center_horizontal"
+        android:maxLines="1"
+        android:textColor="#000000"
+        android:textStyle="bold" />
+    
+    <ProgressBar
+        android:id="@+id/pg_grid"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+    
+
+</RelativeLayout>

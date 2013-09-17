@@ -1,0 +1,120 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginTop="60dp"
+    android:layout_marginBottom="60dp"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:background="#C0000000" >
+        
+        <RelativeLayout 
+            android:id="@+id/header_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp">
+            
+            <TextView 
+                android:id="@+id/txt_name_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp"
+                android:layout_marginLeft="30dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:textIsSelectable="false"/>
+            
+        </RelativeLayout>
+    
+                <View
+                    android:id="@+id/line1_detail"
+   				 	android:layout_width="match_parent"
+    				android:layout_height="1dp"
+    				android:layout_below="@+id/header_detail"
+    				android:layout_marginTop="10dp"
+    				android:layout_marginLeft="20dp"
+    				android:layout_marginRight="20dp"
+    				android:background="#FFFFFF"/>
+                <RelativeLayout 
+                    android:id="@+id/layout_top_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/line1_detail"
+                    android:layout_margin="10dp">
+            
+                          <ImageView 
+          android:id="@+id/image_cover_detail"
+          android:layout_width="wrap_content"
+          android:layout_height="300dp"
+          android:layout_margin="20dp"
+          android:layout_centerVertical="true"
+          android:contentDescription="@null"/>  
+          
+               <TextView 
+                   android:id="@+id/txt_date_detail"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:textIsSelectable="false"
+                   android:layout_margin="10dp"
+                   android:layout_toRightOf="@+id/image_cover_detail"
+                   android:textColor="#FFFFFF"/>
+               <ScrollView 
+                   android:id="@+id/scrolltxt_summary_detail"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_margin="10dp"
+                   android:layout_below="@+id/txt_date_detail"
+                   android:layout_above="@+id/btn_download_detail"
+                   android:layout_toRightOf="@+id/image_cover_detail">
+                 <TextView 
+                   android:id="@+id/txt_summary_detail"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:textIsSelectable="false"
+                   android:textColor="#FFFFFF"/>
+                    </ScrollView>
+                                   <Button
+             android:id="@+id/btn_download_detail"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignParentRight="true"
+             android:layout_alignBottom="@+id/image_cover_detail"
+             android:layout_margin="10dp"
+             android:padding="5dp"
+             android:background="@drawable/bg_download"
+             android:visibility="invisible"
+             android:text="Download"
+             android:contentDescription="@null"/>
+         
+                      <TextView 
+                   android:id="@+id/txt_size_detail"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:textIsSelectable="false"
+                   android:layout_alignBottom="@+id/image_cover_detail"
+                   android:layout_margin="10dp"
+                   android:layout_toLeftOf="@+id/btn_download_detail"
+                   android:textColor="#FFFFFF"/>
+                          
+                </RelativeLayout>
+                
+                                <View
+                    android:id="@+id/line2_detail"
+   				 	android:layout_width="match_parent"
+    				android:layout_height="1dp"
+    				android:layout_below="@+id/layout_top_detail"
+    				android:layout_marginTop="10dp"
+    				android:layout_marginLeft="20dp"
+    				android:layout_marginRight="20dp"
+    				android:background="#FFFFFF"/>
+                                
+              <android.support.v4.view.ViewPager 
+  				android:id="@+id/preview_detail"
+  				android:layout_width="match_parent"
+  				android:layout_height="match_parent"
+  				android:layout_below="@+id/line2_detail"
+  				android:layout_margin="10dp"/>
+    
+</RelativeLayout>

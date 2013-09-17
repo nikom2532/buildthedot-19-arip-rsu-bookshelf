@@ -1,0 +1,2 @@
+set solib-search-path ./obj/local/armeabi
+directory C:/eclipse-SDK-4.2-win32-x86_64/android-ndk-r8c-windows/android-ndk-r8c/platforms/android-8/arch-arm/usr/include ../draw ../fitz ../pdf jni ../thirdparty/jbig2dec ../thirdparty/openjpeg/libopenjpeg ../thirdparty/jpeg ../thirdparty/zlib ../thirdparty/freetype/include ../xps ../cbz ../scripts C:/eclipse-SDK-4.2-win32-x86_64/android-ndk-r8c-windows/android-ndk-r8c/sources/cxx-stl/system

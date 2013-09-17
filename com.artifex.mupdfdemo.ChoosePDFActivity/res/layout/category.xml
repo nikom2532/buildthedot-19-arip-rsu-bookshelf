@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" >
+	
+<RelativeLayout
+    android:id="@+id/layout_category_n"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_centerVertical="true"
+	android:layout_toLeftOf="@+id/line_split_category" >
+	    
+		<ImageView 
+		    android:id="@+id/img_category_n"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		   android:layout_centerVertical="true"
+		    android:contentDescription="@null"/>
+
+		<TextView
+		    android:id="@+id/txt_category_n"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_toRightOf="@+id/img_category_n"
+		    android:layout_centerVertical="true"
+		    android:textAppearance="?android:attr/textAppearanceLarge" />
+		
+		<ProgressBar
+    android:id="@+id/progressbar_category_n"
+    style="?android:attr/progressBarStyleLarge"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true" />
+</RelativeLayout>
+
+	<ImageView
+	    	android:id="@+id/line_split_category"
+    		android:layout_width="1dp"
+		    android:layout_height="match_parent"
+		    android:src="#000000"
+		    android:layout_centerInParent="true"
+		    android:contentDescription="@null"/>
+	
+<RelativeLayout
+    android:id="@+id/layout_category_2n"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_centerVertical="true"
+	android:layout_toRightOf="@+id/line_split_category" >
+		
+		<ImageView 
+		    android:id="@+id/img_category_2n"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_centerVertical="true"
+		    android:contentDescription="@null"/>
+
+		<TextView
+		    android:id="@+id/txt_category_2n"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_toRightOf="@+id/img_category_2n"
+		    android:layout_centerVertical="true"
+		    android:textAppearance="?android:attr/textAppearanceLarge" />
+
+				<ProgressBar
+    android:id="@+id/progressbar_category_2n"
+    style="?android:attr/progressBarStyleLarge"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true" />
+</RelativeLayout>
+
+</RelativeLayout>
