@@ -148,13 +148,15 @@ public class MuPDFCore {
 	public synchronized PointF getPageSize(int page) {
 
 		// extend to handle 2 pages
-		if (numDisplayPages == 1) {
+		if (numDisplayPages == 1 || page == 0) {
 			gotoPage(page);
 			return new PointF(pageWidth, pageHeight);
 		} else {
 			gotoPage(page);
+			if(page == numPages - 1 && numPages % 2 == 0)
+				return new PointF(pageWidth, pageHeight);
+				
 			gotoPage(page + 1);
-
 			return new PointF(pageWidth * 2, pageHeight);
 		}
 	}
@@ -235,6 +237,7 @@ public class MuPDFCore {
 		Canvas canvas = new Canvas(bm);
 		canvas.drawColor(Color.TRANSPARENT);
 		if (numDisplayPages == 1 || page == 0) {
+			Log.e(tag, "draw first page");
 			gotoPage(page);
 			drawPage(bm, pageW, pageH, patchX, patchY, patchW, patchH);
 			return bm;
