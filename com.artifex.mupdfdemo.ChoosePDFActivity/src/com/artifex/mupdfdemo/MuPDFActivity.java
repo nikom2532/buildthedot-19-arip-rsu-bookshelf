@@ -29,6 +29,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -53,6 +54,8 @@ class ThreadPerTaskExecutor implements Executor {
 }
 
 public class MuPDFActivity extends Activity {
+	
+	private final String tag = this.getClass().getSimpleName();
 	/* The core rendering instance */
 	private MuPDFCore core;
 	private String mFileName;
@@ -710,6 +713,7 @@ public class MuPDFActivity extends Activity {
 		SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 		int orientation = prefs.getInt("orientation", mOrientation);
 		int pageNum = prefs.getInt("page" + mFileName, 0);
+		Log.e(tag, "getIndex : " + pageNum);
 		if(orientation == mOrientation)
 			mDocView.setDisplayedViewIndex(pageNum);
 		else {
@@ -762,7 +766,7 @@ public class MuPDFActivity extends Activity {
 		}
 		mDocView.refresh(mReflow);
 	}
-
+	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -776,6 +780,7 @@ public class MuPDFActivity extends Activity {
 			// so it can go in the bundle
 			SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 			SharedPreferences.Editor edit = prefs.edit();
+			Log.e(tag, "index : " + mDocView.getDisplayedViewIndex());
 			edit.putInt("page" + mFileName, mDocView.getDisplayedViewIndex());
 			edit.putInt("orientation", mOrientation);
 			edit.commit();
@@ -798,6 +803,8 @@ public class MuPDFActivity extends Activity {
 			SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 			SharedPreferences.Editor edit = prefs.edit();
 			edit.putInt("page" + mFileName, mDocView.getDisplayedViewIndex());
+			Log.e(tag, "saveIndex : " + mDocView.getDisplayedViewIndex());
+			edit.putInt("orientation", mOrientation);
 			edit.commit();
 		}
 	}

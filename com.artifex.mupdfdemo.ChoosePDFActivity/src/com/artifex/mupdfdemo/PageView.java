@@ -16,6 +16,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -102,6 +103,9 @@ abstract class TextSelector {
 }
 
 public abstract class PageView extends ViewGroup {
+	
+	private final String tag = this.getClass().getSimpleName();
+	
 	private static final int HIGHLIGHT_COLOR = 0x802572AC;
 	private static final int LINK_COLOR = 0x80AC7225;
 	private static final int BACKGROUND_COLOR = 0xFFFFFFFF;
@@ -587,6 +591,7 @@ public abstract class PageView extends ViewGroup {
 	// From Eak, this function must be a helper method for create HQ image when zooming to avoid memory leak
 	// So when zoom load another bitmap image for the visible area's bound and place it instead
 	public void addHq(boolean update) {
+		Log.e(tag, "addHQ");
 		Rect viewArea = new Rect(getLeft(),getTop(),getRight(),getBottom());
 		// If the viewArea's size matches the unzoomed size, there is no need for an hq patch
 		if (viewArea.width() != mSize.x || viewArea.height() != mSize.y) {
@@ -632,6 +637,8 @@ public abstract class PageView extends ViewGroup {
 				mSearchView.bringToFront();
 			}
 
+			System.gc();
+			
 			// From Eak, draw HQ bitmap
 			mDrawPatch = new AsyncTask<PatchInfo,Void,PatchInfo>() {
 				@Override
