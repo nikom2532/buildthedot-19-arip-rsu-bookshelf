@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import th.co.arip.rsubook.R;
 
+import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -49,6 +50,7 @@ class OpaqueImageView extends ImageView {
 	}
 }
 
+// From Eak, class for select text
 abstract class TextSelector {
 	final private TextWord[][] mText;
 	final private RectF mSelectBox;
@@ -114,8 +116,10 @@ public abstract class PageView extends ViewGroup {
 
 	private       ImageView mEntire; // Image rendered at minimum zoom
 	private       BitmapHolder mEntireBmh;
+	// From Eak, this asynctask uses with text selection
 	private       AsyncTask<Void,Void,TextWord[][]> mGetText;
 	private       AsyncTask<RectF[],Void,Void> mAddStrikeOut;
+	
 	private       AsyncTask<Void,Void,LinkInfo[]> mGetLinkInfo;
 	private       AsyncTask<Void,Void,Bitmap> mDrawEntire;
 
@@ -124,11 +128,12 @@ public abstract class PageView extends ViewGroup {
 	private       ImageView mPatch;
 	private       BitmapHolder mPatchBmh;
 	private       AsyncTask<PatchInfo,Void,PatchInfo> mDrawPatch;
-	private       RectF     mSearchBoxes[];
-	protected     LinkInfo  mLinks[];
-	private       RectF     mSelectBox;
+	private       RectF     mSearchBoxes[];	 // From Eak, search highlight region for text
+	protected     LinkInfo  mLinks[];     // From Eak, url link information from with in pdf
+	private       RectF     mSelectBox;   // From Eak, select text highlight region
 	private       TextWord  mText[][];
-	private       View      mSearchView;
+	private       View      mSearchView;  // From Eak, additional layer add on top of pdf image to add search highlight 
+										  // text selection etc...
 	private       boolean   mIsBlank;
 	private       boolean   mHighlightLinks;
 
@@ -147,9 +152,12 @@ public abstract class PageView extends ViewGroup {
 	protected abstract Bitmap drawPage(int sizeX, int sizeY, int patchX, int patchY, int patchWidth, int patchHeight);
 	protected abstract Bitmap updatePage(BitmapHolder h, int sizeX, int sizeY, int patchX, int patchY, int patchWidth, int patchHeight);
 	protected abstract LinkInfo[] getLinkInfo();
+	
+	// From Eak, for text select
 	protected abstract TextWord[][] getText();
 	protected abstract void addStrikeOut(RectF[] lines);
 
+	// From Eak, cancel all asynctask
 	private void reinit() {
 		// Cancel pending render task
 		if (mDrawEntire != null) {
@@ -260,6 +268,7 @@ public abstract class PageView extends ViewGroup {
 		mGetLinkInfo.execute();
 
 		// Render the page in the background
+		// From Eak, draw pdf image to the view
 		mDrawEntire = new AsyncTask<Void,Void,Bitmap>() {
 			@Override
 			protected Bitmap doInBackground(Void... v) {
@@ -299,6 +308,7 @@ public abstract class PageView extends ViewGroup {
 
 		mDrawEntire.execute();
 
+		// From Eak, draw highlight search text on the pdf
 		if (mSearchView == null) {
 			mSearchView = new View(mContext) {
 				@Override
@@ -309,6 +319,7 @@ public abstract class PageView extends ViewGroup {
 					final float scale = mSourceScale*(float)getWidth()/(float)mSize.x;
 					final Paint paint = new Paint();
 
+					// From Eak, highlight search text
 					if (!mIsBlank && mSearchBoxes != null) {
 						paint.setColor(HIGHLIGHT_COLOR);
 						for (RectF rect : mSearchBoxes)
@@ -317,6 +328,7 @@ public abstract class PageView extends ViewGroup {
 									        paint);
 					}
 
+					//From Eak, hightlight url link text
 					if (!mIsBlank && mLinks != null && mHighlightLinks) {
 						paint.setColor(LINK_COLOR);
 						for (LinkInfo link : mLinks)
@@ -325,6 +337,7 @@ public abstract class PageView extends ViewGroup {
 									        paint);
 					}
 
+					// From Eak, highlight text select box
 					if (mSelectBox != null && mText != null) {
 						paint.setColor(HIGHLIGHT_COLOR);
 						TextSelector sel = new TextSelector(mText, mSelectBox) {
@@ -357,23 +370,27 @@ public abstract class PageView extends ViewGroup {
 		requestLayout();
 	}
 
+	// From Eak, set search text region
 	public void setSearchBoxes(RectF searchBoxes[]) {
 		mSearchBoxes = searchBoxes;
 		if (mSearchView != null)
 			mSearchView.invalidate();
 	}
 
+	// From Eak, set highlight to link
 	public void setLinkHighlighting(boolean f) {
 		mHighlightLinks = f;
 		if (mSearchView != null)
 			mSearchView.invalidate();
 	}
 
+	// From Eak, cancel text selection
 	public void deselectText() {
 		mSelectBox = null;
 		mSearchView.invalidate();
 	}
 
+	// From Eak, finding bound for select text
 	public void selectText(float x0, float y0, float x1, float y1) {
 		float scale = mSourceScale*(float)getWidth()/(float)mSize.x;
 		float docRelX0 = (x0 - getLeft())/scale;
@@ -405,6 +422,8 @@ public abstract class PageView extends ViewGroup {
 		}
 	}
 
+	// From Eak, copying text to clip board?
+	@SuppressLint("NewApi")
 	public boolean copySelection() {
 		final StringBuilder text = new StringBuilder();
 
@@ -452,6 +471,7 @@ public abstract class PageView extends ViewGroup {
 		return true;
 	}
 
+	// From Eak, text underline
 	public void strikeOutSelection() {
 		final ArrayList<RectF> lines = new ArrayList<RectF>();
 		TextSelector sel = new TextSelector(mText, mSelectBox) {
@@ -536,7 +556,8 @@ public abstract class PageView extends ViewGroup {
 		if (mEntire != null) {
 			mEntire.layout(0, 0, w, h);
 		}
-
+		
+		// From Eak, search view for add additional layer on the pdf
 		if (mSearchView != null) {
 			mSearchView.layout(0, 0, w, h);
 		}
@@ -563,6 +584,8 @@ public abstract class PageView extends ViewGroup {
 		}
 	}
 
+	// From Eak, this function must be a helper method for create HQ image when zooming to avoid memory leak
+	// So when zoom load another bitmap image for the visible area's bound and place it instead
 	public void addHq(boolean update) {
 		Rect viewArea = new Rect(getLeft(),getTop(),getRight(),getBottom());
 		// If the viewArea's size matches the unzoomed size, there is no need for an hq patch
@@ -605,9 +628,11 @@ public abstract class PageView extends ViewGroup {
 				mPatch = new OpaqueImageView(mContext);
 				mPatch.setScaleType(ImageView.ScaleType.FIT_CENTER);
 				addView(mPatch);
+				// From Eak, search layer
 				mSearchView.bringToFront();
 			}
 
+			// From Eak, draw HQ bitmap
 			mDrawPatch = new AsyncTask<PatchInfo,Void,PatchInfo>() {
 				@Override
 				protected PatchInfo doInBackground(PatchInfo... v) {
@@ -647,6 +672,7 @@ public abstract class PageView extends ViewGroup {
 		}
 	}
 
+	// From Eak, draw the pdf image
 	public void update() {
 		// Cancel pending render task
 		if (mDrawEntire != null) {

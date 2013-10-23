@@ -110,6 +110,7 @@ public class MuPDFPageView extends PageView implements MuPDFView {
 		mChoiceEntryBuilder.setTitle("MuPDF: choose value");
 	}
 
+	// From Eak, check hit match some link
 	@Override
 	public LinkInfo hitLink(float x, float y) {
 		// Since link highlighting was implemented, the super class

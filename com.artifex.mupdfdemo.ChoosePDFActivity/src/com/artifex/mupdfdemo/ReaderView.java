@@ -18,8 +18,10 @@ import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Scroller;
 
+// From Eak, add double tap
 public class ReaderView extends AdapterView<Adapter>
                         implements GestureDetector.OnGestureListener,
+                        			GestureDetector.OnDoubleTapListener,
                                    ScaleGestureDetector.OnScaleGestureListener,
                                    Runnable {
 	private static final int  MOVING_DIAGONALLY = 0;
@@ -113,6 +115,10 @@ public class ReaderView extends AdapterView<Adapter>
 	// 90% of a screenful. But we'd be happy to advance by between
 	// 80% and 95% if it means we hit the bottom in a whole number
 	// of steps.
+	
+	// From Eak this is the code to detect single tab on top/left/right/bottom part of
+	// screen or top/left/right/bottom on pdf file and animate move back or move forward
+	// the page (if we don't want this feature we can remove
 	private int smartAdvanceAmount(int screenHeight, int max) {
 		int advance = (int)(screenHeight * 0.9 + 0.5);
 		int leftOver = max % advance;
@@ -134,6 +140,7 @@ public class ReaderView extends AdapterView<Adapter>
 		return advance;
 	}
 
+	// From Eak move forward when tap at top/left/right/bottom
 	public void smartMoveForwards() {
 		View v = mChildViews.get(mCurrent);
 		if (v == null)
@@ -207,6 +214,7 @@ public class ReaderView extends AdapterView<Adapter>
 		post(this);
 	}
 
+	// From Eak move backward
 	public void smartMoveBackwards() {
 		View v = mChildViews.get(mCurrent);
 		if (v == null)
@@ -280,16 +288,20 @@ public class ReaderView extends AdapterView<Adapter>
 		post(this);
 	}
 
+	// From Eak use in search on PDF, call back to the class override onChildSetup()
 	public void resetupChildren() {
 		for (int i = 0; i < mChildViews.size(); i++)
 			onChildSetup(mChildViews.keyAt(i), mChildViews.valueAt(i));
 	}
-
+	
+	// From Eak, apply any change to the all the pdf pages and get the call back from ViewMapper to apple on individual view
 	public void applyToChildren(ViewMapper mapper) {
 		for (int i = 0; i < mChildViews.size(); i++)
 			mapper.applyToView(mChildViews.valueAt(i));
 	}
 
+	// From Eak, refresh for a reflow view -- we don't need to use this.
+	// (reflow = show pdf only in text mode, no pict)
 	public void refresh(boolean reflow) {
 		mReflow = reflow;
 
@@ -308,6 +320,7 @@ public class ReaderView extends AdapterView<Adapter>
 		requestLayout();
 	}
 
+	// From Eak, callback for child to override
 	protected void onChildSetup(int i, View v) {}
 
 	protected void onMoveToChild(int i) {}
@@ -320,10 +333,12 @@ public class ReaderView extends AdapterView<Adapter>
 
 	protected void onScaleChild(View v, Float scale) {};
 
+	// From Eak, get current display pdf view
 	public View getDisplayedView() {
 		return mChildViews.get(mCurrent);
 	}
 
+	// From Eak, runable for scrolling
 	@Override
 	public void run() {
 		if (!mScroller.isFinished()) {
@@ -346,15 +361,19 @@ public class ReaderView extends AdapterView<Adapter>
 		}
 	}
 
+	// Fror Eak, onDown callback from gesture listener
 	@Override
 	public boolean onDown(MotionEvent arg0) {
+		// stop scrolling
 		mScroller.forceFinished(true);
 		return true;
 	}
 
+	// From Eak, onFling callback from gesture listener
 	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
+		// check is scroll enable
 		if (mScrollDisabled)
 			return true;
 
@@ -426,9 +445,27 @@ public class ReaderView extends AdapterView<Adapter>
 	@Override
 	public void onShowPress(MotionEvent e) {
 	}
-
+	
 	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
+		return false;
+	}
+	// From Eak, add double tap event
+	@Override
+	public boolean onDoubleTap(MotionEvent e) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onDoubleTapEvent(MotionEvent e) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean onSingleTapConfirmed(MotionEvent e) {
+		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -440,6 +477,7 @@ public class ReaderView extends AdapterView<Adapter>
 		float max_scale = MAX_SCALE * scale_factor;
 		mScale = Math.min(Math.max(mScale * detector.getScaleFactor(), min_scale), max_scale);
 
+		// From Eak, we don't need reflow
 		if (mReflow) {
 			applyToChildren(new ViewMapper() {
 				@Override
@@ -692,6 +730,7 @@ public class ReaderView extends AdapterView<Adapter>
 			addAndMeasureChild(i, v);
 		}
 		onChildSetup(i, v);
+		// From Eak, we don't need scale for reflow
 		onScaleChild(v, mScale);
 
 		return v;
@@ -719,6 +758,7 @@ public class ReaderView extends AdapterView<Adapter>
 		v.measure(View.MeasureSpec.EXACTLY | (int)(v.getMeasuredWidth()*scale*mScale),
 				View.MeasureSpec.EXACTLY | (int)(v.getMeasuredHeight()*scale*mScale));
 		} else {
+			// From Eak, we don't need reflow
 			v.measure(View.MeasureSpec.EXACTLY | (int)(v.getMeasuredWidth()),
 					View.MeasureSpec.EXACTLY | (int)(v.getMeasuredHeight()));
 		}

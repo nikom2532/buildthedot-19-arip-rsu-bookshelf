@@ -8,7 +8,6 @@ import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import th.co.arip.rsubook.R;
 
 public class MuPDFReaderView extends ReaderView {
 	private final Context mContext;
@@ -186,6 +185,7 @@ public class MuPDFReaderView extends ReaderView {
 		((MuPDFView) v).releaseResources();
 	}
 
+	// From Eak, we don't need this
 	@Override
 	protected void onScaleChild(View v, Float scale) {
 		((MuPDFView) v).setScale(scale);
