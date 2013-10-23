@@ -292,6 +292,7 @@ public final class R {
         public static final int content_failure=0x7f070005;
         public static final int copy=0x7f070013;
         public static final int enter_password=0x7f07000c;
+        public static final int error=0x7f070015;
         public static final int link_control=0x7f07000f;
         public static final int no_further_occurences_found=0x7f070010;
         public static final int no_media_hint=0x7f070003;
