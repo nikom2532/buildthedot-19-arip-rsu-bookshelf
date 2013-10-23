@@ -29,14 +29,17 @@ public class ChoosePDFAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 
+	@Override
 	public int getCount() {
 		return mItems.size();
 	}
 
+	@Override
 	public Object getItem(int i) {
 		return null;
 	}
 
+	@Override
 	public long getItemId(int arg0) {
 		return 0;
 	}
@@ -50,6 +53,7 @@ public class ChoosePDFAdapter extends BaseAdapter {
 		}
 	}
 
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		View v;
 		if (convertView == null) {

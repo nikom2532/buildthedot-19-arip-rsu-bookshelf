@@ -930,7 +930,8 @@ public class MainActivity extends Activity implements OnClickListener {
 			File target = new File(ext, "Android/data/"+getPackageName()+"/cache/"+String.valueOf(category.get(a).get("image").hashCode()));        
 			aq.download(category.get(a).get("image"), target, new AjaxCallback<File>(){
 
-		        public void callback(String url, File file, AjaxStatus status) {
+		        @Override
+				public void callback(String url, File file, AjaxStatus status) {
 		                if(file != null){
 
 		                }
@@ -1144,7 +1145,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void search(EditText edt)
     {
     	String word = edt.getText().toString();
-		if( !word.isEmpty() )
+		if( !(word.length() == 0) )
 		{
 			if( edt == edtSearch )
 			{

@@ -324,6 +324,7 @@ public class ReaderView extends AdapterView<Adapter>
 		return mChildViews.get(mCurrent);
 	}
 
+	@Override
 	public void run() {
 		if (!mScroller.isFinished()) {
 			mScroller.computeScrollOffset();
@@ -345,11 +346,13 @@ public class ReaderView extends AdapterView<Adapter>
 		}
 	}
 
+	@Override
 	public boolean onDown(MotionEvent arg0) {
 		mScroller.forceFinished(true);
 		return true;
 	}
 
+	@Override
 	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
 		if (mScrollDisabled)
@@ -405,9 +408,11 @@ public class ReaderView extends AdapterView<Adapter>
 		return true;
 	}
 
+	@Override
 	public void onLongPress(MotionEvent e) {
 	}
 
+	@Override
 	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
 			float distanceY) {
 		if (!mScrollDisabled) {
@@ -418,13 +423,16 @@ public class ReaderView extends AdapterView<Adapter>
 		return true;
 	}
 
+	@Override
 	public void onShowPress(MotionEvent e) {
 	}
 
+	@Override
 	public boolean onSingleTapUp(MotionEvent e) {
 		return false;
 	}
 
+	@Override
 	public boolean onScale(ScaleGestureDetector detector) {
 		float previousScale = mScale;
 		float scale_factor = mReflow ? REFLOW_SCALE_FACTOR : 1.0f;
@@ -456,6 +464,7 @@ public class ReaderView extends AdapterView<Adapter>
 		return true;
 	}
 
+	@Override
 	public boolean onScaleBegin(ScaleGestureDetector detector) {
 		mScaling = true;
 		// Ignore any scroll amounts yet to be accounted for: the
@@ -468,6 +477,7 @@ public class ReaderView extends AdapterView<Adapter>
 		return true;
 	}
 
+	@Override
 	public void onScaleEnd(ScaleGestureDetector detector) {
 		mScaling = false;
 	}
@@ -748,6 +758,7 @@ public class ReaderView extends AdapterView<Adapter>
 		// wont be executed until after the system has performed
 		// layout.
 		post (new Runnable() {
+			@Override
 			public void run () {
 				onSettle(v);
 			}
@@ -756,6 +767,7 @@ public class ReaderView extends AdapterView<Adapter>
 
 	private void postUnsettle(final View v) {
 		post (new Runnable() {
+			@Override
 			public void run () {
 				onUnsettle(v);
 			}

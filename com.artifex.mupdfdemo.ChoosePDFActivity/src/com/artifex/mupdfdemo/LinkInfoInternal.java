@@ -10,6 +10,7 @@ public class LinkInfoInternal extends LinkInfo {
 		pageNumber = p;
 	}
 
+	@Override
 	public void acceptVisitor(LinkInfoVisitor visitor) {
 		visitor.visitInternal(this);
 	}

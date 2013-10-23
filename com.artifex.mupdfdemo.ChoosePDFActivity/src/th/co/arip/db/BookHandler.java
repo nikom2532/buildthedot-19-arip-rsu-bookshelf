@@ -146,7 +146,8 @@ public class BookHandler {
 
 		aq.download(image, target, new AjaxCallback<File>(){
 		        
-		        public void callback(String url, File file, AjaxStatus status) {
+		        @Override
+				public void callback(String url, File file, AjaxStatus status) {
 		                pd.dismiss();
 		                if(file != null){
 		            			values.put(SQLiteHandler.COLUMN_IMAGE, file.getAbsolutePath());

@@ -8,6 +8,7 @@ import th.co.arip.rsubook.R;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorSet;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -44,6 +45,7 @@ import android.widget.TextView;
 import android.widget.ViewAnimator;
 
 class ThreadPerTaskExecutor implements Executor {
+	@Override
 	public void execute(Runnable r) {
 		new Thread(r).start();
 	}
@@ -123,6 +125,7 @@ public class MuPDFActivity extends Activity
 				for(int i = 0; i < 3; i++)
 					pressed[i] = MuPDFAlert.ButtonPressed.None;
 				DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						mAlertDialog = null;
 						if (mAlertsActive) {
@@ -175,6 +178,7 @@ public class MuPDFActivity extends Activity
 					break;
 				}
 				mAlertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+					@Override
 					public void onCancel(DialogInterface dialog) {
 						mAlertDialog = null;
 						if (mAlertsActive) {
@@ -299,6 +303,7 @@ public class MuPDFActivity extends Activity
 								setTitle(String.format(contentFailure, openFailed, failString));
 								alert.setButton(AlertDialog.BUTTON_POSITIVE, "Dismiss",
 										new DialogInterface.OnClickListener() {
+											@Override
 											public void onClick(DialogInterface dialog, int which) {
 												finish();
 											}
@@ -329,6 +334,7 @@ public class MuPDFActivity extends Activity
 			alert.setTitle(R.string.open_failed);
 			alert.setButton(AlertDialog.BUTTON_POSITIVE, "Dismiss",
 					new DialogInterface.OnClickListener() {
+						@Override
 						public void onClick(DialogInterface dialog, int which) {
 							finish();
 						}
@@ -350,6 +356,7 @@ public class MuPDFActivity extends Activity
 		alert.setView(mPasswordView);
 		alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok",
 				new DialogInterface.OnClickListener() {
+			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				if (core.authenticatePassword(mPasswordView.getText().toString())) {
 					createUI(savedInstanceState);
@@ -361,6 +368,7 @@ public class MuPDFActivity extends Activity
 		alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
 				new DialogInterface.OnClickListener() {
 
+			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				finish();
 			}
@@ -427,12 +435,15 @@ public class MuPDFActivity extends Activity
 
 		// Activate the seekbar
 		mPageSlider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+			@Override
 			public void onStopTrackingTouch(SeekBar seekBar) {
 				mDocView.setDisplayedViewIndex((seekBar.getProgress()+mPageSliderRes/2)/mPageSliderRes);
 			}
 
+			@Override
 			public void onStartTrackingTouch(SeekBar seekBar) {}
 
+			@Override
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
 				updatePageNumView((progress+mPageSliderRes/2)/mPageSliderRes);
@@ -441,6 +452,7 @@ public class MuPDFActivity extends Activity
 
 		// Activate the search-preparing button
 		mSearchButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				searchModeOn();
 			}
@@ -448,6 +460,7 @@ public class MuPDFActivity extends Activity
 
 		// Activate the reflow button
 		mReflowButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				toggleReflow();
 			}
@@ -455,6 +468,7 @@ public class MuPDFActivity extends Activity
 
 		// Activate the select button
 		mSelectButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				mDocView.setSelectionMode(true);
 				mTopBarSwitcher.setDisplayedChild(2);
@@ -462,6 +476,7 @@ public class MuPDFActivity extends Activity
 		});
 
 		mCancelSelectButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				MuPDFView pageView = (MuPDFView) mDocView.getDisplayedView();
 				if (pageView != null)
@@ -473,6 +488,8 @@ public class MuPDFActivity extends Activity
 
 		final Context context = this;
 		mCopySelectButton.setOnClickListener(new View.OnClickListener() {
+			@SuppressLint("NewApi")
+			@Override
 			public void onClick(View v) {
 				MuPDFView pageView = (MuPDFView) mDocView.getDisplayedView();
 				boolean copied = false;
@@ -487,17 +504,21 @@ public class MuPDFActivity extends Activity
 					AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(context, R.animator.info);
 					set.setTarget(mInfoView);
 					set.addListener(new Animator.AnimatorListener() {
+						@Override
 						public void onAnimationStart(Animator animation) {
 							mInfoView.setVisibility(View.VISIBLE);
 						}
 
+						@Override
 						public void onAnimationRepeat(Animator animation) {
 						}
 
+						@Override
 						public void onAnimationEnd(Animator animation) {
 							mInfoView.setVisibility(View.INVISIBLE);
 						}
 
+						@Override
 						public void onAnimationCancel(Animator animation) {
 						}
 					});
@@ -505,6 +526,7 @@ public class MuPDFActivity extends Activity
 				} else {
 					mInfoView.setVisibility(View.VISIBLE);
 					mHandler.postDelayed(new Runnable() {
+						@Override
 						public void run() {
 							mInfoView.setVisibility(View.INVISIBLE);
 						}
@@ -514,6 +536,7 @@ public class MuPDFActivity extends Activity
 		});
 
 		mStrikeOutButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				MuPDFView pageView = (MuPDFView) mDocView.getDisplayedView();
 				if (pageView != null)
@@ -524,6 +547,7 @@ public class MuPDFActivity extends Activity
 		});
 
 		mCancelButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				searchModeOff();
 			}
@@ -538,6 +562,7 @@ public class MuPDFActivity extends Activity
 		// React to interaction with the text widget
 		mSearchText.addTextChangedListener(new TextWatcher() {
 
+			@Override
 			public void afterTextChanged(Editable s) {
 				boolean haveText = s.toString().length() > 0;
 				mSearchBack.setEnabled(haveText);
@@ -556,14 +581,17 @@ public class MuPDFActivity extends Activity
 					mDocView.resetupChildren();
 				}
 			}
+			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count,
 					int after) {}
+			@Override
 			public void onTextChanged(CharSequence s, int start, int before,
 					int count) {}
 		});
 
 		//React to Done button on keyboard
 		mSearchText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+			@Override
 			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 				if (actionId == EditorInfo.IME_ACTION_DONE)
 					search(1);
@@ -572,6 +600,7 @@ public class MuPDFActivity extends Activity
 		});
 
 		mSearchText.setOnKeyListener(new View.OnKeyListener() {
+			@Override
 			public boolean onKey(View v, int keyCode, KeyEvent event) {
 				if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER)
 					search(1);
@@ -581,17 +610,20 @@ public class MuPDFActivity extends Activity
 
 		// Activate search invoking buttons
 		mSearchBack.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				search(-1);
 			}
 		});
 		mSearchFwd.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				search(1);
 			}
 		});
 
 		mLinkButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View v) {
 				if (mLinkHighlight) {
 					mLinkButton.setColorFilter(Color.argb(0xFF, 255, 255, 255));
@@ -608,6 +640,7 @@ public class MuPDFActivity extends Activity
 
 		if (core.hasOutline()) {
 			mOutlineButton.setOnClickListener(new View.OnClickListener() {
+				@Override
 				public void onClick(View v) {
 					OutlineItem outline[] = core.getOutline();
 					if (outline != null) {
@@ -647,6 +680,7 @@ public class MuPDFActivity extends Activity
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
+	@Override
 	public Object onRetainNonConfigurationInstance()
 	{
 		MuPDFCore mycore = core;
@@ -704,6 +738,7 @@ public class MuPDFActivity extends Activity
 		}
 	}
 
+	@Override
 	public void onDestroy()
 	{
 		if (core != null)
@@ -734,10 +769,13 @@ public class MuPDFActivity extends Activity
 			Animation anim = new TranslateAnimation(0, 0, -mTopBarSwitcher.getHeight(), 0);
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
+				@Override
 				public void onAnimationStart(Animation animation) {
 					mTopBarSwitcher.setVisibility(View.VISIBLE);
 				}
+				@Override
 				public void onAnimationRepeat(Animation animation) {}
+				@Override
 				public void onAnimationEnd(Animation animation) {}
 			});
 			mTopBarSwitcher.startAnimation(anim);
@@ -745,10 +783,13 @@ public class MuPDFActivity extends Activity
 			anim = new TranslateAnimation(0, 0, mPageSlider.getHeight(), 0);
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
+				@Override
 				public void onAnimationStart(Animation animation) {
 					mPageSlider.setVisibility(View.VISIBLE);
 				}
+				@Override
 				public void onAnimationRepeat(Animation animation) {}
+				@Override
 				public void onAnimationEnd(Animation animation) {
 					mPageNumberView.setVisibility(View.VISIBLE);
 				}
@@ -765,8 +806,11 @@ public class MuPDFActivity extends Activity
 			Animation anim = new TranslateAnimation(0, 0, 0, -mTopBarSwitcher.getHeight());
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
+				@Override
 				public void onAnimationStart(Animation animation) {}
+				@Override
 				public void onAnimationRepeat(Animation animation) {}
+				@Override
 				public void onAnimationEnd(Animation animation) {
 					mTopBarSwitcher.setVisibility(View.INVISIBLE);
 				}
@@ -776,10 +820,13 @@ public class MuPDFActivity extends Activity
 			anim = new TranslateAnimation(0, 0, 0, mPageSlider.getHeight());
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
+				@Override
 				public void onAnimationStart(Animation animation) {
 					mPageNumberView.setVisibility(View.INVISIBLE);
 				}
+				@Override
 				public void onAnimationRepeat(Animation animation) {}
+				@Override
 				public void onAnimationEnd(Animation animation) {
 					mPageSlider.setVisibility(View.INVISIBLE);
 				}
@@ -909,6 +956,7 @@ public class MuPDFActivity extends Activity
 	public void onBackPressed() {
 		if (core.hasChanges()) {
 			DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					if (which == AlertDialog.BUTTON_POSITIVE)
 						core.save();

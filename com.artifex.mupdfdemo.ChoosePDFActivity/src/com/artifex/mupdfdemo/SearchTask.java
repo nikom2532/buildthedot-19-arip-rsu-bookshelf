@@ -62,6 +62,7 @@ public abstract class SearchTask {
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.setTitle(mContext.getString(R.string.searching_));
 		progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			@Override
 			public void onCancel(DialogInterface dialog) {
 				stop();
 			}
@@ -113,6 +114,7 @@ public abstract class SearchTask {
 			protected void onPreExecute() {
 				super.onPreExecute();
 				mHandler.postDelayed(new Runnable() {
+					@Override
 					public void run() {
 						if (!progressDialog.isCancelled())
 						{

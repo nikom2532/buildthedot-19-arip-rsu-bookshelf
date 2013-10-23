@@ -245,10 +245,12 @@ public abstract class PageView extends ViewGroup {
 
 		// Get the link info in the background
 		mGetLinkInfo = new AsyncTask<Void,Void,LinkInfo[]>() {
+			@Override
 			protected LinkInfo[] doInBackground(Void... v) {
 				return getLinkInfo();
 			}
 
+			@Override
 			protected void onPostExecute(LinkInfo[] v) {
 				mLinks = v;
 				invalidate();
@@ -259,10 +261,12 @@ public abstract class PageView extends ViewGroup {
 
 		// Render the page in the background
 		mDrawEntire = new AsyncTask<Void,Void,Bitmap>() {
+			@Override
 			protected Bitmap doInBackground(Void... v) {
 				return drawPage(mSize.x, mSize.y, 0, 0, mSize.x, mSize.y);
 			}
 
+			@Override
 			protected void onPreExecute() {
 				mEntire.setImageBitmap(null);
 				mEntireBmh.setBm(null);
@@ -274,6 +278,7 @@ public abstract class PageView extends ViewGroup {
 					addView(mBusyIndicator);
 					mBusyIndicator.setVisibility(INVISIBLE);
 					mHandler.postDelayed(new Runnable() {
+						@Override
 						public void run() {
 							if (mBusyIndicator != null)
 								mBusyIndicator.setVisibility(VISIBLE);
@@ -282,6 +287,7 @@ public abstract class PageView extends ViewGroup {
 				}
 			}
 
+			@Override
 			protected void onPostExecute(Bitmap bm) {
 				removeView(mBusyIndicator);
 				mBusyIndicator = null;
@@ -603,6 +609,7 @@ public abstract class PageView extends ViewGroup {
 			}
 
 			mDrawPatch = new AsyncTask<PatchInfo,Void,PatchInfo>() {
+				@Override
 				protected PatchInfo doInBackground(PatchInfo... v) {
 					if (v[0].completeRedraw) {
 						v[0].bm = drawPage(v[0].patchViewSize.x, v[0].patchViewSize.y,
@@ -617,6 +624,7 @@ public abstract class PageView extends ViewGroup {
 					return v[0];
 				}
 
+				@Override
 				protected void onPostExecute(PatchInfo v) {
 					if (mPatchBmh == v.bmh) {
 						mPatchViewSize = v.patchViewSize;
@@ -653,6 +661,7 @@ public abstract class PageView extends ViewGroup {
 
 		// Render the page in the background
 		mDrawEntire = new AsyncTask<Void,Void,Bitmap>() {
+			@Override
 			protected Bitmap doInBackground(Void... v) {
 				// Pass the current bitmap as a basis for the update, but use a bitmap
 				// holder so that the held bitmap will be nulled and not hold on to
@@ -660,6 +669,7 @@ public abstract class PageView extends ViewGroup {
 				return updatePage(mEntireBmh, mSize.x, mSize.y, 0, 0, mSize.x, mSize.y);
 			}
 
+			@Override
 			protected void onPostExecute(Bitmap bm) {
 				if (bm != null) {
 					mEntire.setImageBitmap(bm);
