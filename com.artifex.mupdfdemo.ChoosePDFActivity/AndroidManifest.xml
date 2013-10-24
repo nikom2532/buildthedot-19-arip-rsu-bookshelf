@@ -77,6 +77,11 @@
             android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
             android:label="@string/outline_title">
         </activity>
+        <activity
+            android:name="com.artifex.mupdfdemo.GridPreviewActivity"
+            android:theme="@android:style/Theme.Light.NoTitleBar.Fullscreen"
+            android:label="@string/outline_title">
+        </activity>
         
                 <activity
             android:name=".MainActivity"
