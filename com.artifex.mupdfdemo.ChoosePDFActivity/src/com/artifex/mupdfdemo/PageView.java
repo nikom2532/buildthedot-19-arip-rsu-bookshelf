@@ -10,6 +10,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -156,6 +157,7 @@ public abstract class PageView extends ViewGroup {
 	protected abstract Bitmap drawPage(int sizeX, int sizeY, int patchX, int patchY, int patchWidth, int patchHeight);
 	protected abstract Bitmap updatePage(BitmapHolder h, int sizeX, int sizeY, int patchX, int patchY, int patchWidth, int patchHeight);
 	protected abstract LinkInfo[] getLinkInfo();
+	protected abstract void drawComplete(int page);
 	
 	// From Eak, for text select
 	protected abstract TextWord[][] getText();
@@ -229,7 +231,7 @@ public abstract class PageView extends ViewGroup {
 			addView(mBusyIndicator);
 		}
 	}
-
+	
 	public void setPage(int page, PointF size) {
 		// Cancel pending render task
 		if (mDrawEntire != null) {
@@ -302,6 +304,7 @@ public abstract class PageView extends ViewGroup {
 
 			@Override
 			protected void onPostExecute(Bitmap bm) {
+				drawComplete(mPageNumber);
 				removeView(mBusyIndicator);
 				mBusyIndicator = null;
 				mEntire.setImageBitmap(bm);

@@ -1,6 +1,7 @@
 package com.artifex.mupdfdemo;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.SparseArray;
@@ -42,13 +43,14 @@ public class MuPDFPageAdapter extends BaseAdapter {
 		} else {
 			pageView = (MuPDFPageView) convertView;
 		}
-
+		
 		PointF pageSize = mPageSizes.get(position);
 		if (pageSize != null) {
 			// We already know the page size. Set it up
 			// immediately
 			pageView.setPage(position, pageSize);
 		} else {
+			
 			// Page size as yet unknown. Blank it for now, and
 			// start a background task to find the size
 			pageView.blank(position);

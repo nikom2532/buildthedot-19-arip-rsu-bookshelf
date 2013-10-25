@@ -4,6 +4,7 @@ import java.util.concurrent.Executor;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import th.co.arip.rsubook.R;
+import th.co.arip.rsubook.lib.TwoWayView;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -39,11 +40,14 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewAnimator;
 
 class ThreadPerTaskExecutor implements Executor {
@@ -54,43 +58,46 @@ class ThreadPerTaskExecutor implements Executor {
 }
 
 public class MuPDFActivity extends Activity {
-	
+
 	private final String tag = this.getClass().getSimpleName();
+
+	private final int REQUEST_GRID = 0;
+	private final int REQUEST_OUTLINE = 1;
 	/* The core rendering instance */
 	private MuPDFCore core;
 	private String mFileName;
 	private MuPDFReaderView mDocView;
 	private View mButtonsView;
 	private boolean mButtonsVisible;
-	private EditText mPasswordView;
-	private TextView mFilenameView;
-	private SeekBar mPageSlider;
-	private int mPageSliderRes;
-	private TextView mPageNumberView;
-	private TextView mInfoView;
-	private ImageButton mSearchButton;
-	private ImageButton mReflowButton;
-	private ImageButton mSelectButton;
-	private ImageButton mCancelSelectButton;
-	private ImageButton mCopySelectButton;
-	private ImageButton mStrikeOutButton;
-	private ImageButton mCancelButton;
-	private ImageButton mOutlineButton;
-	private ViewAnimator mTopBarSwitcher;
-	private ImageButton mLinkButton;
-	private boolean mTopBarIsSearch;
-	private ImageButton mSearchBack;
-	private ImageButton mSearchFwd;
-	private EditText mSearchText;
-	private SearchTask mSearchTask;
+
+	// From Eak, Add our View
+	private LinearLayout topBar;
+	private TwoWayView bottomBar;
+	private PDFSlideAdapter adapter;
+	private TextView tPdfTitle;
+	private ImageButton bOutline;
+	private ImageButton bGrid;
+
+	/*
+	 * private EditText mPasswordView; private TextView mFilenameView; private
+	 * SeekBar mPageSlider; private int mPageSliderRes; private TextView
+	 * mPageNumberView; private TextView mInfoView; private ImageButton
+	 * mSearchButton; private ImageButton mReflowButton; private ImageButton
+	 * mSelectButton; private ImageButton mCancelSelectButton; private
+	 * ImageButton mCopySelectButton; private ImageButton mStrikeOutButton;
+	 * private ImageButton mCancelButton; private ImageButton mOutlineButton;
+	 * private ViewAnimator mTopBarSwitcher; private ImageButton mLinkButton;
+	 * private boolean mTopBarIsSearch; private ImageButton mSearchBack; private
+	 * ImageButton mSearchFwd; private EditText mSearchText; private SearchTask
+	 * mSearchTask; private boolean mLinkHighlight = false; private final
+	 * Handler mHandler = new Handler(); private boolean mReflow = false;
+	 */
+
 	private AlertDialog.Builder mAlertBuilder;
-	private boolean mLinkHighlight = false;
-	private final Handler mHandler = new Handler();
 	private boolean mAlertsActive = false;
-	private boolean mReflow = false;
 	private AsyncTask<Void, Void, MuPDFAlert> mAlertTask;
 	private AlertDialog mAlertDialog;
-	
+
 	private int mOrientation;
 
 	public void createAlertWaiter() {
@@ -275,10 +282,10 @@ public class MuPDFActivity extends Activity {
 		if (core == null) {
 			return;
 		}
-		
+
 		mOrientation = getResources().getConfiguration().orientation;
-		
-		if(mOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+		if (mOrientation == Configuration.ORIENTATION_LANDSCAPE) {
 			core.setNumDisplayPages(2);
 		} else {
 			core.setNumDisplayPages(1);
@@ -363,7 +370,7 @@ public class MuPDFActivity extends Activity {
 				SearchTaskResult.set(null);
 			}
 			if (core != null && core.needsPassword()) {
-				requestPassword(savedInstanceState);
+				// requestPassword(savedInstanceState);
 				return null;
 			}
 		}
@@ -383,37 +390,28 @@ public class MuPDFActivity extends Activity {
 		return core;
 	}
 
-	public void requestPassword(final Bundle savedInstanceState) {
-		mPasswordView = new EditText(this);
-		mPasswordView.setInputType(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
-		mPasswordView
-				.setTransformationMethod(new PasswordTransformationMethod());
-
-		AlertDialog alert = mAlertBuilder.create();
-		alert.setTitle(R.string.enter_password);
-		alert.setView(mPasswordView);
-		alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok",
-				new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (core.authenticatePassword(mPasswordView.getText()
-								.toString())) {
-							createUI(savedInstanceState);
-						} else {
-							requestPassword(savedInstanceState);
-						}
-					}
-				});
-		alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						finish();
-					}
-				});
-		alert.show();
-	}
+	/*
+	 * public void requestPassword(final Bundle savedInstanceState) {
+	 * mPasswordView = new EditText(this);
+	 * mPasswordView.setInputType(EditorInfo.TYPE_TEXT_VARIATION_PASSWORD);
+	 * mPasswordView .setTransformationMethod(new
+	 * PasswordTransformationMethod());
+	 * 
+	 * AlertDialog alert = mAlertBuilder.create();
+	 * alert.setTitle(R.string.enter_password); alert.setView(mPasswordView);
+	 * alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new
+	 * DialogInterface.OnClickListener() {
+	 * 
+	 * @Override public void onClick(DialogInterface dialog, int which) { if
+	 * (core.authenticatePassword(mPasswordView.getText() .toString())) {
+	 * createUI(savedInstanceState); } else {
+	 * requestPassword(savedInstanceState); } } });
+	 * alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new
+	 * DialogInterface.OnClickListener() {
+	 * 
+	 * @Override public void onClick(DialogInterface dialog, int which) {
+	 * finish(); } }); alert.show(); }
+	 */
 
 	public void createUI(Bundle savedInstanceState) {
 		if (core == null)
@@ -426,10 +424,13 @@ public class MuPDFActivity extends Activity {
 			protected void onMoveToChild(int i) {
 				if (core == null)
 					return;
-				mPageNumberView.setText(String.format("%d / %d", i + 1,
-						core.countPages()));
-				mPageSlider.setMax((core.countPages() - 1) * mPageSliderRes);
-				mPageSlider.setProgress(i * mPageSliderRes);
+				// From Eak, setting page when first load
+				/*
+				 * mPageNumberView.setText(String.format("%d / %d", i + 1,
+				 * core.countPages())); mPageSlider.setMax((core.countPages() -
+				 * 1) * mPageSliderRes); mPageSlider.setProgress(i *
+				 * mPageSliderRes);
+				 */
 				super.onMoveToChild(i);
 			}
 
@@ -449,278 +450,213 @@ public class MuPDFActivity extends Activity {
 		};
 		mDocView.setAdapter(new MuPDFPageAdapter(this, core));
 
-		mSearchTask = new SearchTask(this, core) {
-			@Override
-			protected void onTextFound(SearchTaskResult result) {
-				SearchTaskResult.set(result);
-				// Ask the ReaderView to move to the resulting page
-				mDocView.setDisplayedViewIndex(result.pageNumber);
-				// Make the ReaderView act on the change to SearchTaskResult
-				// via overridden onChildSetup method.
-				mDocView.resetupChildren();
-			}
-		};
+		/*
+		 * mSearchTask = new SearchTask(this, core) {
+		 * 
+		 * @Override protected void onTextFound(SearchTaskResult result) {
+		 * SearchTaskResult.set(result); // Ask the ReaderView to move to the
+		 * resulting page mDocView.setDisplayedViewIndex(result.pageNumber); //
+		 * Make the ReaderView act on the change to SearchTaskResult // via
+		 * overridden onChildSetup method. mDocView.resetupChildren(); } };
+		 */
 
 		// Make the buttons overlay, and store all its
 		// controls in variables
 		makeButtonsView();
 
-		// Set up the page slider
-		int smax = Math.max(core.countPages() - 1, 1);
-		mPageSliderRes = ((10 + smax - 1) / smax) * 2;
+		// From Eak, remove unnecessary buttons and views
+		/*
+		 * // Set up the page slider int smax = Math.max(core.countPages() - 1,
+		 * 1); mPageSliderRes = ((10 + smax - 1) / smax) * 2;
+		 * 
+		 * // Set the file-name text mFilenameView.setText(mFileName);
+		 * 
+		 * // Activate the seekbar mPageSlider .setOnSeekBarChangeListener(new
+		 * SeekBar.OnSeekBarChangeListener() {
+		 * 
+		 * @Override public void onStopTrackingTouch(SeekBar seekBar) {
+		 * mDocView.setDisplayedViewIndex((seekBar.getProgress() +
+		 * mPageSliderRes / 2) / mPageSliderRes); }
+		 * 
+		 * @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+		 * 
+		 * @Override public void onProgressChanged(SeekBar seekBar, int
+		 * progress, boolean fromUser) { updatePageNumView((progress +
+		 * mPageSliderRes / 2) / mPageSliderRes); } });
+		 * 
+		 * // Activate the search-preparing button
+		 * mSearchButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { searchModeOn(); } });
+		 * 
+		 * // Activate the reflow button mReflowButton.setOnClickListener(new
+		 * View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { toggleReflow(); } });
+		 * 
+		 * // Activate the select button mSelectButton.setOnClickListener(new
+		 * View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) {
+		 * mDocView.setSelectionMode(true);
+		 * mTopBarSwitcher.setDisplayedChild(2); } });
+		 * 
+		 * mCancelSelectButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { MuPDFView pageView =
+		 * (MuPDFView) mDocView.getDisplayedView(); if (pageView != null)
+		 * pageView.deselectText(); mDocView.setSelectionMode(false);
+		 * mTopBarSwitcher.setDisplayedChild(0); } });
+		 * 
+		 * final Context context = this;
+		 * mCopySelectButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @SuppressLint("NewApi")
+		 * 
+		 * @Override public void onClick(View v) { MuPDFView pageView =
+		 * (MuPDFView) mDocView.getDisplayedView(); boolean copied = false; if
+		 * (pageView != null) copied = pageView.copySelection();
+		 * mDocView.setSelectionMode(false);
+		 * mTopBarSwitcher.setDisplayedChild(0); mInfoView.setText(copied ?
+		 * "Copied to clipboard" : "No text selected");
+		 * 
+		 * int currentApiVersion = android.os.Build.VERSION.SDK_INT; if
+		 * (currentApiVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+		 * AnimatorSet set = (AnimatorSet) AnimatorInflater
+		 * .loadAnimator(context, R.animator.info); set.setTarget(mInfoView);
+		 * set.addListener(new Animator.AnimatorListener() {
+		 * 
+		 * @Override public void onAnimationStart(Animator animation) {
+		 * mInfoView.setVisibility(View.VISIBLE); }
+		 * 
+		 * @Override public void onAnimationRepeat(Animator animation) { }
+		 * 
+		 * @Override public void onAnimationEnd(Animator animation) {
+		 * mInfoView.setVisibility(View.INVISIBLE); }
+		 * 
+		 * @Override public void onAnimationCancel(Animator animation) { } });
+		 * set.start(); } else { mInfoView.setVisibility(View.VISIBLE);
+		 * mHandler.postDelayed(new Runnable() {
+		 * 
+		 * @Override public void run() {
+		 * mInfoView.setVisibility(View.INVISIBLE); } }, 500); } } });
+		 * 
+		 * mStrikeOutButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { MuPDFView pageView =
+		 * (MuPDFView) mDocView.getDisplayedView(); if (pageView != null)
+		 * pageView.strikeOutSelection(); mDocView.setSelectionMode(false);
+		 * mTopBarSwitcher.setDisplayedChild(0); } });
+		 * 
+		 * mCancelButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { searchModeOff(); } });
+		 * 
+		 * // Search invoking buttons are disabled while there is no text
+		 * specified mSearchBack.setEnabled(false);
+		 * mSearchFwd.setEnabled(false);
+		 * mSearchBack.setColorFilter(Color.argb(255, 128, 128, 128));
+		 * mSearchFwd.setColorFilter(Color.argb(255, 128, 128, 128));
+		 * 
+		 * // React to interaction with the text widget
+		 * mSearchText.addTextChangedListener(new TextWatcher() {
+		 * 
+		 * @Override public void afterTextChanged(Editable s) { boolean haveText
+		 * = s.toString().length() > 0; mSearchBack.setEnabled(haveText);
+		 * mSearchFwd.setEnabled(haveText); if (haveText) {
+		 * mSearchBack.setColorFilter(Color.argb(255, 255, 255, 255));
+		 * mSearchFwd.setColorFilter(Color.argb(255, 255, 255, 255)); } else {
+		 * mSearchBack.setColorFilter(Color.argb(255, 128, 128, 128));
+		 * mSearchFwd.setColorFilter(Color.argb(255, 128, 128, 128)); }
+		 * 
+		 * // Remove any previous search results if (SearchTaskResult.get() !=
+		 * null && !mSearchText.getText().toString()
+		 * .equals(SearchTaskResult.get().txt)) { SearchTaskResult.set(null);
+		 * mDocView.resetupChildren(); } }
+		 * 
+		 * @Override public void beforeTextChanged(CharSequence s, int start,
+		 * int count, int after) { }
+		 * 
+		 * @Override public void onTextChanged(CharSequence s, int start, int
+		 * before, int count) { } });
+		 * 
+		 * // React to Done button on keyboard mSearchText
+		 * .setOnEditorActionListener(new TextView.OnEditorActionListener() {
+		 * 
+		 * @Override public boolean onEditorAction(TextView v, int actionId,
+		 * KeyEvent event) { if (actionId == EditorInfo.IME_ACTION_DONE)
+		 * search(1); return false; } });
+		 * 
+		 * mSearchText.setOnKeyListener(new View.OnKeyListener() {
+		 * 
+		 * @Override public boolean onKey(View v, int keyCode, KeyEvent event) {
+		 * if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode ==
+		 * KeyEvent.KEYCODE_ENTER) search(1); return false; } });
+		 * 
+		 * // Activate search invoking buttons
+		 * mSearchBack.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { search(-1); } });
+		 * mSearchFwd.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { search(1); } });
+		 * 
+		 * mLinkButton.setOnClickListener(new View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { if (mLinkHighlight) {
+		 * mLinkButton.setColorFilter(Color.argb(0xFF, 255, 255, 255));
+		 * mLinkHighlight = false; } else { // LINK_COLOR tint
+		 * mLinkButton.setColorFilter(Color.argb(0xFF, 172, 114, 37));
+		 * mLinkHighlight = true; } // Inform pages of the change.
+		 * mDocView.setLinksEnabled(mLinkHighlight); } });
+		 * 
+		 * if (core.hasOutline()) { mOutlineButton.setOnClickListener(new
+		 * View.OnClickListener() {
+		 * 
+		 * @Override public void onClick(View v) { OutlineItem outline[] =
+		 * core.getOutline(); if (outline != null) {
+		 * OutlineActivityData.get().items = outline; Intent intent = new
+		 * Intent(MuPDFActivity.this, OutlineActivity.class);
+		 * startActivityForResult(intent, 0); } } }); } else {
+		 * mOutlineButton.setVisibility(View.GONE); }
+		 */
 
-		// Set the file-name text
-		mFilenameView.setText(mFileName);
+		// From Eak, add button listener for gridview(preview) and
+		// listview(outline)
+		bGrid.setOnClickListener(new View.OnClickListener() {
 
-		// Activate the seekbar
-		mPageSlider
-				.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-					@Override
-					public void onStopTrackingTouch(SeekBar seekBar) {
-						mDocView.setDisplayedViewIndex((seekBar.getProgress() + mPageSliderRes / 2)
-								/ mPageSliderRes);
-					}
-
-					@Override
-					public void onStartTrackingTouch(SeekBar seekBar) {
-					}
-
-					@Override
-					public void onProgressChanged(SeekBar seekBar,
-							int progress, boolean fromUser) {
-						updatePageNumView((progress + mPageSliderRes / 2)
-								/ mPageSliderRes);
-					}
-				});
-
-		// Activate the search-preparing button
-		mSearchButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				searchModeOn();
+				// TODO Auto-generated method stub
+				MuPDFCoreHelper.core = core;
+				Intent i = new Intent(MuPDFActivity.this,
+						GridPreviewActivity.class);
+				startActivityForResult(i, REQUEST_GRID);
 			}
 		});
 
-		// Activate the reflow button
-		mReflowButton.setOnClickListener(new View.OnClickListener() {
+		bOutline.setOnClickListener(new View.OnClickListener() {
+
 			@Override
 			public void onClick(View v) {
-				toggleReflow();
+				// TODO Auto-generated method stub
+
 			}
 		});
-
-		// Activate the select button
-		mSelectButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				mDocView.setSelectionMode(true);
-				mTopBarSwitcher.setDisplayedChild(2);
-			}
-		});
-
-		mCancelSelectButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				MuPDFView pageView = (MuPDFView) mDocView.getDisplayedView();
-				if (pageView != null)
-					pageView.deselectText();
-				mDocView.setSelectionMode(false);
-				mTopBarSwitcher.setDisplayedChild(0);
-			}
-		});
-
-		final Context context = this;
-		mCopySelectButton.setOnClickListener(new View.OnClickListener() {
-			@SuppressLint("NewApi")
-			@Override
-			public void onClick(View v) {
-				MuPDFView pageView = (MuPDFView) mDocView.getDisplayedView();
-				boolean copied = false;
-				if (pageView != null)
-					copied = pageView.copySelection();
-				mDocView.setSelectionMode(false);
-				mTopBarSwitcher.setDisplayedChild(0);
-				mInfoView.setText(copied ? "Copied to clipboard"
-						: "No text selected");
-
-				int currentApiVersion = android.os.Build.VERSION.SDK_INT;
-				if (currentApiVersion >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-					AnimatorSet set = (AnimatorSet) AnimatorInflater
-							.loadAnimator(context, R.animator.info);
-					set.setTarget(mInfoView);
-					set.addListener(new Animator.AnimatorListener() {
-						@Override
-						public void onAnimationStart(Animator animation) {
-							mInfoView.setVisibility(View.VISIBLE);
-						}
-
-						@Override
-						public void onAnimationRepeat(Animator animation) {
-						}
-
-						@Override
-						public void onAnimationEnd(Animator animation) {
-							mInfoView.setVisibility(View.INVISIBLE);
-						}
-
-						@Override
-						public void onAnimationCancel(Animator animation) {
-						}
-					});
-					set.start();
-				} else {
-					mInfoView.setVisibility(View.VISIBLE);
-					mHandler.postDelayed(new Runnable() {
-						@Override
-						public void run() {
-							mInfoView.setVisibility(View.INVISIBLE);
-						}
-					}, 500);
-				}
-			}
-		});
-
-		mStrikeOutButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				MuPDFView pageView = (MuPDFView) mDocView.getDisplayedView();
-				if (pageView != null)
-					pageView.strikeOutSelection();
-				mDocView.setSelectionMode(false);
-				mTopBarSwitcher.setDisplayedChild(0);
-			}
-		});
-
-		mCancelButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				searchModeOff();
-			}
-		});
-
-		// Search invoking buttons are disabled while there is no text specified
-		mSearchBack.setEnabled(false);
-		mSearchFwd.setEnabled(false);
-		mSearchBack.setColorFilter(Color.argb(255, 128, 128, 128));
-		mSearchFwd.setColorFilter(Color.argb(255, 128, 128, 128));
-
-		// React to interaction with the text widget
-		mSearchText.addTextChangedListener(new TextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				boolean haveText = s.toString().length() > 0;
-				mSearchBack.setEnabled(haveText);
-				mSearchFwd.setEnabled(haveText);
-				if (haveText) {
-					mSearchBack.setColorFilter(Color.argb(255, 255, 255, 255));
-					mSearchFwd.setColorFilter(Color.argb(255, 255, 255, 255));
-				} else {
-					mSearchBack.setColorFilter(Color.argb(255, 128, 128, 128));
-					mSearchFwd.setColorFilter(Color.argb(255, 128, 128, 128));
-				}
-
-				// Remove any previous search results
-				if (SearchTaskResult.get() != null
-						&& !mSearchText.getText().toString()
-								.equals(SearchTaskResult.get().txt)) {
-					SearchTaskResult.set(null);
-					mDocView.resetupChildren();
-				}
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count,
-					int after) {
-			}
-
-			@Override
-			public void onTextChanged(CharSequence s, int start, int before,
-					int count) {
-			}
-		});
-
-		// React to Done button on keyboard
-		mSearchText
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					@Override
-					public boolean onEditorAction(TextView v, int actionId,
-							KeyEvent event) {
-						if (actionId == EditorInfo.IME_ACTION_DONE)
-							search(1);
-						return false;
-					}
-				});
-
-		mSearchText.setOnKeyListener(new View.OnKeyListener() {
-			@Override
-			public boolean onKey(View v, int keyCode, KeyEvent event) {
-				if (event.getAction() == KeyEvent.ACTION_DOWN
-						&& keyCode == KeyEvent.KEYCODE_ENTER)
-					search(1);
-				return false;
-			}
-		});
-
-		// Activate search invoking buttons
-		mSearchBack.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				search(-1);
-			}
-		});
-		mSearchFwd.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				search(1);
-			}
-		});
-
-		mLinkButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mLinkHighlight) {
-					mLinkButton.setColorFilter(Color.argb(0xFF, 255, 255, 255));
-					mLinkHighlight = false;
-				} else {
-					// LINK_COLOR tint
-					mLinkButton.setColorFilter(Color.argb(0xFF, 172, 114, 37));
-					mLinkHighlight = true;
-				}
-				// Inform pages of the change.
-				mDocView.setLinksEnabled(mLinkHighlight);
-			}
-		});
-
-		if (core.hasOutline()) {
-			mOutlineButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					OutlineItem outline[] = core.getOutline();
-					if (outline != null) {
-						OutlineActivityData.get().items = outline;
-						Intent intent = new Intent(MuPDFActivity.this,
-								OutlineActivity.class);
-						startActivityForResult(intent, 0);
-					}
-				}
-			});
-		} else {
-			mOutlineButton.setVisibility(View.GONE);
-		}
 
 		// Reenstate last state if it was recorded
 		SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
 		int orientation = prefs.getInt("orientation", mOrientation);
 		int pageNum = prefs.getInt("page" + mFileName, 0);
 		Log.e(tag, "getIndex : " + pageNum);
-		if(orientation == mOrientation)
+		if (orientation == mOrientation)
 			mDocView.setDisplayedViewIndex(pageNum);
 		else {
-			if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+			if (orientation == Configuration.ORIENTATION_PORTRAIT) {
 				mDocView.setDisplayedViewIndex((pageNum + 1) / 2);
 			} else {
-				mDocView.setDisplayedViewIndex((pageNum == 0) ? 0 : pageNum * 2 - 1);
+				mDocView.setDisplayedViewIndex((pageNum == 0) ? 0
+						: pageNum * 2 - 1);
 			}
 		}
 
@@ -728,9 +664,11 @@ public class MuPDFActivity extends Activity {
 				|| !savedInstanceState.getBoolean("ButtonsHidden", false))
 			showButtons();
 
-		if (savedInstanceState != null
-				&& savedInstanceState.getBoolean("SearchMode", false))
-			searchModeOn();
+		// From Eak, no search mode
+		/*
+		 * if (savedInstanceState != null &&
+		 * savedInstanceState.getBoolean("SearchMode", false)) searchModeOn();
+		 */
 
 		// Stick the document view and the buttons overlay into a parent view
 		RelativeLayout layout = new RelativeLayout(this);
@@ -741,10 +679,13 @@ public class MuPDFActivity extends Activity {
 		setContentView(layout);
 	}
 
+	// From Eak, get select page based on the number of display pages
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.e(tag, "Page Click : " + resultCode);
 		if (resultCode >= 0)
-			mDocView.setDisplayedViewIndex(resultCode);
+			mDocView.setDisplayedViewIndex(getSelectPage(resultCode));
+
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
@@ -755,18 +696,15 @@ public class MuPDFActivity extends Activity {
 		return mycore;
 	}
 
-	private void toggleReflow() {
-		mReflow = !mReflow;
-		if (mReflow) {
-			mDocView.setAdapter(new MuPDFReflowAdapter(this, core));
-			mReflowButton.setColorFilter(Color.argb(0xFF, 172, 114, 37));
-		} else {
-			mDocView.setAdapter(new MuPDFPageAdapter(this, core));
-			mReflowButton.setColorFilter(Color.argb(0xFF, 255, 255, 255));
-		}
-		mDocView.refresh(mReflow);
-	}
-	
+	/*
+	 * private void toggleReflow() { mReflow = !mReflow; if (mReflow) {
+	 * mDocView.setAdapter(new MuPDFReflowAdapter(this, core));
+	 * mReflowButton.setColorFilter(Color.argb(0xFF, 172, 114, 37)); } else {
+	 * mDocView.setAdapter(new MuPDFPageAdapter(this, core));
+	 * mReflowButton.setColorFilter(Color.argb(0xFF, 255, 255, 255)); }
+	 * mDocView.refresh(mReflow); }
+	 */
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -789,15 +727,16 @@ public class MuPDFActivity extends Activity {
 		if (!mButtonsVisible)
 			outState.putBoolean("ButtonsHidden", true);
 
-		if (mTopBarIsSearch)
-			outState.putBoolean("SearchMode", true);
+		/*
+		 * if (mTopBarIsSearch) outState.putBoolean("SearchMode", true);
+		 */
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
 
-		mSearchTask.stop();
+		// mSearchTask.stop();
 
 		if (mFileName != null && mDocView != null) {
 			SharedPreferences prefs = getPreferences(Context.MODE_PRIVATE);
@@ -828,21 +767,22 @@ public class MuPDFActivity extends Activity {
 			mButtonsVisible = true;
 			// Update page number text and slider
 			int index = mDocView.getDisplayedViewIndex();
-			updatePageNumView(index);
-			mPageSlider.setMax((core.countPages() - 1) * mPageSliderRes);
-			mPageSlider.setProgress(index * mPageSliderRes);
-			if (mTopBarIsSearch) {
-				mSearchText.requestFocus();
-				showKeyboard();
-			}
+			// From Eak, updatePageNumView of slider text
+			// updatePageNumView(index);
+			/*
+			 * mPageSlider.setMax((core.countPages() - 1) * mPageSliderRes);
+			 * mPageSlider.setProgress(index * mPageSliderRes); if
+			 * (mTopBarIsSearch) { mSearchText.requestFocus(); showKeyboard(); }
+			 */
 
-			Animation anim = new TranslateAnimation(0, 0,
-					-mTopBarSwitcher.getHeight(), 0);
+			// From Eak, animation showing top bar
+			Animation anim = new TranslateAnimation(0, 0, -topBar.getHeight(),
+					0);
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
 				@Override
 				public void onAnimationStart(Animation animation) {
-					mTopBarSwitcher.setVisibility(View.VISIBLE);
+					topBar.setVisibility(View.VISIBLE);
 				}
 
 				@Override
@@ -853,14 +793,15 @@ public class MuPDFActivity extends Activity {
 				public void onAnimationEnd(Animation animation) {
 				}
 			});
-			mTopBarSwitcher.startAnimation(anim);
+			topBar.startAnimation(anim);
 
-			anim = new TranslateAnimation(0, 0, mPageSlider.getHeight(), 0);
+			// From Eak, animation showing bottom bar
+			anim = new TranslateAnimation(0, 0, bottomBar.getHeight(), 0);
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
 				@Override
 				public void onAnimationStart(Animation animation) {
-					mPageSlider.setVisibility(View.VISIBLE);
+					bottomBar.setVisibility(View.VISIBLE);
 				}
 
 				@Override
@@ -869,20 +810,20 @@ public class MuPDFActivity extends Activity {
 
 				@Override
 				public void onAnimationEnd(Animation animation) {
-					mPageNumberView.setVisibility(View.VISIBLE);
 				}
 			});
-			mPageSlider.startAnimation(anim);
+			bottomBar.startAnimation(anim);
 		}
 	}
 
 	void hideButtons() {
 		if (mButtonsVisible) {
 			mButtonsVisible = false;
-			hideKeyboard();
+			// hideKeyboard();
 
+			// From Eak, animation hiding top bar
 			Animation anim = new TranslateAnimation(0, 0, 0,
-					-mTopBarSwitcher.getHeight());
+					-topBar.getHeight());
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
 				@Override
@@ -895,17 +836,18 @@ public class MuPDFActivity extends Activity {
 
 				@Override
 				public void onAnimationEnd(Animation animation) {
-					mTopBarSwitcher.setVisibility(View.INVISIBLE);
+					topBar.setVisibility(View.INVISIBLE);
 				}
 			});
-			mTopBarSwitcher.startAnimation(anim);
+			topBar.startAnimation(anim);
 
-			anim = new TranslateAnimation(0, 0, 0, mPageSlider.getHeight());
+			// From Eak, animation hiding bottom bar
+			anim = new TranslateAnimation(0, 0, 0, bottomBar.getHeight());
 			anim.setDuration(200);
 			anim.setAnimationListener(new Animation.AnimationListener() {
 				@Override
 				public void onAnimationStart(Animation animation) {
-					mPageNumberView.setVisibility(View.INVISIBLE);
+					bottomBar.setVisibility(View.INVISIBLE);
 				}
 
 				@Override
@@ -914,115 +856,125 @@ public class MuPDFActivity extends Activity {
 
 				@Override
 				public void onAnimationEnd(Animation animation) {
-					mPageSlider.setVisibility(View.INVISIBLE);
 				}
 			});
-			mPageSlider.startAnimation(anim);
+			bottomBar.startAnimation(anim);
 		}
 	}
 
-	void searchModeOn() {
-		if (!mTopBarIsSearch) {
-			mTopBarIsSearch = true;
-			// Focus on EditTextWidget
-			mSearchText.requestFocus();
-			showKeyboard();
-			mTopBarSwitcher.setDisplayedChild(1);
-		}
-	}
+	// From Eak, no search mode
+	/*
+	 * void searchModeOn() { if (!mTopBarIsSearch) { mTopBarIsSearch = true; //
+	 * Focus on EditTextWidget mSearchText.requestFocus(); showKeyboard();
+	 * mTopBarSwitcher.setDisplayedChild(1); } }
+	 */
 
-	void searchModeOff() {
-		if (mTopBarIsSearch) {
-			mTopBarIsSearch = false;
-			hideKeyboard();
-			mTopBarSwitcher.setDisplayedChild(0);
-			SearchTaskResult.set(null);
-			// Make the ReaderView act on the change to mSearchTaskResult
-			// via overridden onChildSetup method.
-			mDocView.resetupChildren();
-		}
-	}
+	// From Eak, no search mode
+	/*
+	 * void searchModeOff() { if (mTopBarIsSearch) { mTopBarIsSearch = false;
+	 * hideKeyboard(); mTopBarSwitcher.setDisplayedChild(0);
+	 * SearchTaskResult.set(null); // Make the ReaderView act on the change to
+	 * mSearchTaskResult // via overridden onChildSetup method.
+	 * mDocView.resetupChildren(); } }
+	 */
 
-	void updatePageNumView(int index) {
-		if (core == null)
-			return;
-		mPageNumberView.setText(String.format("%d / %d", index + 1,
-				core.countPages()));
-	}
+	// From Eak, update slider page text to show, no need, we don't use slider
+	/*
+	 * void updatePageNumView(int index) { if (core == null) return;
+	 * mPageNumberView.setText(String.format("%d / %d", index + 1,
+	 * core.countPages())); }
+	 */
 
 	void makeButtonsView() {
 		mButtonsView = getLayoutInflater().inflate(R.layout.buttons, null);
-		mFilenameView = (TextView) mButtonsView.findViewById(R.id.docNameText);
-		mPageSlider = (SeekBar) mButtonsView.findViewById(R.id.pageSlider);
-		mPageNumberView = (TextView) mButtonsView.findViewById(R.id.pageNumber);
-		mInfoView = (TextView) mButtonsView.findViewById(R.id.info);
-		mSearchButton = (ImageButton) mButtonsView
-				.findViewById(R.id.searchButton);
-		mReflowButton = (ImageButton) mButtonsView
-				.findViewById(R.id.reflowButton);
-		mSelectButton = (ImageButton) mButtonsView
-				.findViewById(R.id.selectButton);
-		mCancelSelectButton = (ImageButton) mButtonsView
-				.findViewById(R.id.cancelSelectButton);
-		mCopySelectButton = (ImageButton) mButtonsView
-				.findViewById(R.id.copySelectButton);
-		mStrikeOutButton = (ImageButton) mButtonsView
-				.findViewById(R.id.strikeOutButton);
-		mCancelButton = (ImageButton) mButtonsView.findViewById(R.id.cancel);
-		mOutlineButton = (ImageButton) mButtonsView
-				.findViewById(R.id.outlineButton);
-		mTopBarSwitcher = (ViewAnimator) mButtonsView
-				.findViewById(R.id.switcher);
-		mSearchBack = (ImageButton) mButtonsView.findViewById(R.id.searchBack);
-		mSearchFwd = (ImageButton) mButtonsView
-				.findViewById(R.id.searchForward);
-		mSearchText = (EditText) mButtonsView.findViewById(R.id.searchText);
-		mLinkButton = (ImageButton) mButtonsView.findViewById(R.id.linkButton);
-		mTopBarSwitcher.setVisibility(View.INVISIBLE);
-		mPageNumberView.setVisibility(View.INVISIBLE);
-		mInfoView.setVisibility(View.INVISIBLE);
-		mPageSlider.setVisibility(View.INVISIBLE);
+
+		topBar = (LinearLayout) mButtonsView.findViewById(R.id.topbar);
+
+		bOutline = (ImageButton) mButtonsView.findViewById(R.id.outlineButton);
+		bGrid = (ImageButton) mButtonsView.findViewById(R.id.gridButton);
+
+		bottomBar = (TwoWayView) mButtonsView.findViewById(R.id.bottombar);
+		adapter = new PDFSlideAdapter(this, core);
+		bottomBar.setAdapter(adapter);
+		bottomBar.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View v,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				Toast.makeText(getBaseContext(),
+						"Click Position : " + String.valueOf(position + 1),
+						Toast.LENGTH_SHORT).show();
+				mDocView.setDisplayedViewIndex(getSelectPage(position));
+				hideButtons();
+			}
+		});
+
+		topBar.setVisibility(View.INVISIBLE);
+		bottomBar.setVisibility(View.INVISIBLE);
+
+		// From Eak, remove unnecessary UIs.
+		/*
+		 * mFilenameView = (TextView)
+		 * mButtonsView.findViewById(R.id.docNameText); mPageSlider = (SeekBar)
+		 * mButtonsView.findViewById(R.id.pageSlider); mPageNumberView =
+		 * (TextView) mButtonsView.findViewById(R.id.pageNumber); mInfoView =
+		 * (TextView) mButtonsView.findViewById(R.id.info); mSearchButton =
+		 * (ImageButton) mButtonsView .findViewById(R.id.searchButton);
+		 * mReflowButton = (ImageButton) mButtonsView
+		 * .findViewById(R.id.reflowButton); mSelectButton = (ImageButton)
+		 * mButtonsView .findViewById(R.id.selectButton); mCancelSelectButton =
+		 * (ImageButton) mButtonsView .findViewById(R.id.cancelSelectButton);
+		 * mCopySelectButton = (ImageButton) mButtonsView
+		 * .findViewById(R.id.copySelectButton); mStrikeOutButton =
+		 * (ImageButton) mButtonsView .findViewById(R.id.strikeOutButton);
+		 * mCancelButton = (ImageButton) mButtonsView.findViewById(R.id.cancel);
+		 * mOutlineButton = (ImageButton) mButtonsView
+		 * .findViewById(R.id.outlineButton); mTopBarSwitcher = (ViewAnimator)
+		 * mButtonsView .findViewById(R.id.switcher); mSearchBack =
+		 * (ImageButton) mButtonsView.findViewById(R.id.searchBack); mSearchFwd
+		 * = (ImageButton) mButtonsView .findViewById(R.id.searchForward);
+		 * mSearchText = (EditText) mButtonsView.findViewById(R.id.searchText);
+		 * mLinkButton = (ImageButton)
+		 * mButtonsView.findViewById(R.id.linkButton);
+		 * mTopBarSwitcher.setVisibility(View.INVISIBLE);
+		 * mPageNumberView.setVisibility(View.INVISIBLE);
+		 * mInfoView.setVisibility(View.INVISIBLE);
+		 * mPageSlider.setVisibility(View.INVISIBLE);
+		 */
 	}
 
-	void showKeyboard() {
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		if (imm != null)
-			imm.showSoftInput(mSearchText, 0);
-	}
+	// From Eak, no keyboard showing
+	/*
+	 * void showKeyboard() { InputMethodManager imm = (InputMethodManager)
+	 * getSystemService(Context.INPUT_METHOD_SERVICE); if (imm != null)
+	 * imm.showSoftInput(mSearchText, 0); }
+	 * 
+	 * void hideKeyboard() { InputMethodManager imm = (InputMethodManager)
+	 * getSystemService(Context.INPUT_METHOD_SERVICE); if (imm != null)
+	 * imm.hideSoftInputFromWindow(mSearchText.getWindowToken(), 0); }
+	 */
 
-	void hideKeyboard() {
-		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		if (imm != null)
-			imm.hideSoftInputFromWindow(mSearchText.getWindowToken(), 0);
-	}
-
-	void search(int direction) {
-		hideKeyboard();
-		int displayPage = mDocView.getDisplayedViewIndex();
-		SearchTaskResult r = SearchTaskResult.get();
-		int searchPage = r != null ? r.pageNumber : -1;
-		mSearchTask.go(mSearchText.getText().toString(), direction,
-				displayPage, searchPage);
-	}
-
-	@Override
-	public boolean onSearchRequested() {
-		if (mButtonsVisible && mTopBarIsSearch) {
-			hideButtons();
-		} else {
-			showButtons();
-			searchModeOn();
-		}
-		return super.onSearchRequested();
-	}
+	// From Eak, no search mode
+	/*
+	 * void search(int direction) { hideKeyboard(); int displayPage =
+	 * mDocView.getDisplayedViewIndex(); SearchTaskResult r =
+	 * SearchTaskResult.get(); int searchPage = r != null ? r.pageNumber : -1;
+	 * mSearchTask.go(mSearchText.getText().toString(), direction, displayPage,
+	 * searchPage); }
+	 * 
+	 * @Override public boolean onSearchRequested() { if (mButtonsVisible &&
+	 * mTopBarIsSearch) { hideButtons(); } else { showButtons(); searchModeOn();
+	 * } return super.onSearchRequested(); }
+	 */
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		if (mButtonsVisible && !mTopBarIsSearch) {
+		if (mButtonsVisible /* && !mTopBarIsSearch */) {
 			hideButtons();
 		} else {
 			showButtons();
-			searchModeOff();
+			// searchModeOff();
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -1047,26 +999,27 @@ public class MuPDFActivity extends Activity {
 		super.onStop();
 	}
 
-	@Override
-	public void onBackPressed() {
-		if (core.hasChanges()) {
-			DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					if (which == AlertDialog.BUTTON_POSITIVE)
-						core.save();
-
-					finish();
-				}
-			};
-			AlertDialog alert = mAlertBuilder.create();
-			alert.setTitle("MuPDF");
-			alert.setMessage("Document has changes. Save them?");
-			alert.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", listener);
-			alert.setButton(AlertDialog.BUTTON_NEGATIVE, "No", listener);
-			alert.show();
-		} else {
-			super.onBackPressed();
-		}
+	private int getSelectPage(int page) {
+		if (core.getNumDisplayPages() == 1 || page == 0)
+			return page;
+		else
+			return (page + 1) / 2;
 	}
+
+	// From Eak, no change to document pdf in our case, no need.
+	/*
+	 * @Override public void onBackPressed() { if (core.hasChanges()) {
+	 * DialogInterface.OnClickListener listener = new
+	 * DialogInterface.OnClickListener() {
+	 * 
+	 * @Override public void onClick(DialogInterface dialog, int which) { if
+	 * (which == AlertDialog.BUTTON_POSITIVE) core.save();
+	 * 
+	 * finish(); } }; AlertDialog alert = mAlertBuilder.create();
+	 * alert.setTitle("MuPDF");
+	 * alert.setMessage("Document has changes. Save them?");
+	 * alert.setButton(AlertDialog.BUTTON_POSITIVE, "Yes", listener);
+	 * alert.setButton(AlertDialog.BUTTON_NEGATIVE, "No", listener);
+	 * alert.show(); } else { super.onBackPressed(); } }
+	 */
 }

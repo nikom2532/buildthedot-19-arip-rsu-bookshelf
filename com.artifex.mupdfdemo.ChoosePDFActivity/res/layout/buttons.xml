@@ -1,9 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <LinearLayout
+        android:id="@+id/topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:background="@color/toolbar" >
+
+        <TextView
+            android:id="@+id/docNameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingLeft="16dp"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/outlineButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button"
+            android:contentDescription="@string/search_document"
+            android:src="@drawable/ic_list" />
+
+        <ImageButton
+            android:id="@+id/gridButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button"
+            android:contentDescription="@string/link_control"
+            android:src="@drawable/ic_reflow" />
+    </LinearLayout>
+
+    <th.co.arip.rsubook.lib.TwoWayView
+        android:id="@+id/bottombar"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+        android:background="@color/toolbar" />
+    <!--
     <ViewAnimator
         android:id="@+id/switcher"
         android:layout_width="wrap_content"
@@ -170,7 +215,10 @@
 
         </RelativeLayout>
     </ViewAnimator>
+    -->
 
+
+    <!--
     <RelativeLayout
         android:id="@+id/lowerButtons"
         android:layout_width="match_parent"
@@ -206,8 +254,11 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
     </RelativeLayout>
+    -->
 
-    <TextView
+
+    <!--
+         <TextView
         android:id="@+id/info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -217,4 +268,6 @@
         android:background="@drawable/page_num"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
+    -->
+
 </RelativeLayout>

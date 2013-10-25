@@ -16,8 +16,11 @@ public class MuPDFReaderView extends ReaderView {
 	private boolean tapDisabled = false;
 	private int tapPageMargin;
 
-	protected void onTapMainDocArea() {}
-	protected void onDocMotion() {}
+	protected void onTapMainDocArea() {
+	}
+
+	protected void onDocMotion() {
+	}
 
 	public void setLinksEnabled(boolean b) {
 		mLinksEnabled = b;
@@ -40,11 +43,11 @@ public class MuPDFReaderView extends ReaderView {
 		// to ensure we are never more than 1/5 of the screen width.
 		DisplayMetrics dm = new DisplayMetrics();
 		act.getWindowManager().getDefaultDisplay().getMetrics(dm);
-		tapPageMargin = (int)dm.xdpi;
+		tapPageMargin = (int) dm.xdpi;
 		if (tapPageMargin < 100)
 			tapPageMargin = 100;
-		if (tapPageMargin > dm.widthPixels/5)
-			tapPageMargin = dm.widthPixels/5;
+		if (tapPageMargin > dm.widthPixels / 5)
+			tapPageMargin = dm.widthPixels / 5;
 	}
 
 	@Override
@@ -77,17 +80,19 @@ public class MuPDFReaderView extends ReaderView {
 						// Clicked on a remote (GoToR) link
 					}
 				});
-			} else if (e.getX() < tapPageMargin) {
-				super.smartMoveBackwards();
-			} else if (e.getX() > super.getWidth() - tapPageMargin) {
-				super.smartMoveForwards();
-			} else if (e.getY() < tapPageMargin) {
-				super.smartMoveBackwards();
-			} else if (e.getY() > super.getHeight() - tapPageMargin) {
-				super.smartMoveForwards();
 			} else {
 				onTapMainDocArea();
 			}
+			// From Eak, it is annoy when touch some side the page move forward and backward
+			/*else if (e.getX() < tapPageMargin) {
+				super.smartMoveBackwards();
+				} else if (e.getX() > super.getWidth() - tapPageMargin) {
+				super.smartMoveForwards();
+				} else if (e.getY() < tapPageMargin) {
+				super.smartMoveBackwards();
+				} else if (e.getY() > super.getHeight() - tapPageMargin) {
+				super.smartMoveForwards();
+				}*/
 		}
 		return super.onSingleTapUp(e);
 	}
@@ -101,7 +106,7 @@ public class MuPDFReaderView extends ReaderView {
 
 			return super.onScroll(e1, e2, distanceX, distanceY);
 		} else {
-			MuPDFView pageView = (MuPDFView)getDisplayedView();
+			MuPDFView pageView = (MuPDFView) getDisplayedView();
 			if (pageView != null)
 				pageView.selectText(e1.getX(), e1.getY(), e2.getX(), e2.getY());
 			return true;

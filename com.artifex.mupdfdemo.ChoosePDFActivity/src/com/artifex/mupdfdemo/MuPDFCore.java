@@ -1,7 +1,6 @@
 package com.artifex.mupdfdemo;
 
 import java.util.ArrayList;
-import th.co.arip.rsubook.R;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -124,11 +123,18 @@ public class MuPDFCore {
 		} else {
 			return numPages / 2 + 1;
 		}
+	}
 
+	public int countOriginalPages() {
+		return numPages;
 	}
 
 	public void setNumDisplayPages(int numDisplayPages) {
 		this.numDisplayPages = numDisplayPages;
+	}
+
+	public int getNumDisplayPages() {
+		return numDisplayPages;
 	}
 
 	private synchronized int countPagesSynchronized() {
@@ -150,32 +156,36 @@ public class MuPDFCore {
 	public synchronized PointF getPageSize(int page) {
 
 		// extend to handle 2 pages
-		if (numDisplayPages == 1 || page == 0) {
+		if (numDisplayPages == 1 /*|| page == 0*/) {
 			gotoPage(page);
 			return new PointF(pageWidth, pageHeight);
 		} else {
 			gotoPage(page);
-			
+
 			Log.e(tag, "getPageSizeWithPage : " + page);
 			// if the number of pages is even.
 			// then the last page will be alone.
-			if(page == numPages / 2 && numPages % 2 == 0)
-				return new PointF(pageWidth, pageHeight);
-	
+			/*if (page == numPages / 2 && numPages % 2 == 0)
+				return new PointF(pageWidth, pageHeight);*/
+
 			// get size of left page
 			float leftWidth = pageWidth;
 			float leftHeight = pageHeight;
-			
+
 			// move to right page to get size of right page
 			gotoPage(page + 1);
-			
+
 			// combine width of 2 pages
 			float screenWidth = leftWidth + pageWidth;
-			
+
 			// use height of the largest one
 			float screenHeight = Math.max(leftHeight, pageHeight);
 			return new PointF(screenWidth, screenHeight);
 		}
+	}
+
+	public synchronized PointF getPageOriginalSize(int page) {
+		return new PointF(pageWidth, pageHeight);
 	}
 
 	public MuPDFAlert waitForAlert() {
@@ -198,6 +208,12 @@ public class MuPDFCore {
 	public synchronized void onDestroy() {
 		destroying();
 		globals = 0;
+	}
+
+	public synchronized void drawScalePage(int page, Bitmap bm, int pageW,
+			int pageH) {
+		gotoPage(page);
+		drawPage(bm, pageW, pageH, 0, 0, pageW, pageH);
 	}
 
 	// page = number of page
@@ -253,37 +269,40 @@ public class MuPDFCore {
 		Bitmap bm = Bitmap.createBitmap(patchW, patchH, Config.ARGB_8888);
 		Canvas canvas = new Canvas(bm);
 		canvas.drawColor(Color.TRANSPARENT);
-		
+
 		Log.e(tag, "getPage Number : " + page);
 		Log.e(tag, "numPages : " + numPages);
-		
-		// draw single page for vertical and first and last screen for horizontal (last screen with even number of pages)
-		if (numDisplayPages == 1 || page == 0) {
+
+		// draw single page for vertical and first and last screen for
+		// horizontal (last screen with even number of pages)
+		if (numDisplayPages == 1 /*|| page == 0*/) {
 			Log.e(tag, "draw first page");
 			gotoPage(page);
 			drawPage(bm, pageW, pageH, patchX, patchY, patchW, patchH);
 			return bm;
-		} else if (numDisplayPages == 2 && numPages % 2 == 0
+		} /*else if (numDisplayPages == 2 && numPages % 2 == 0
 				&& page == numPages / 2) {
 			Log.e(tag, "draw last page");
 			gotoPage(numPages - 1);
 			drawPage(bm, pageW, pageH, patchX, patchY, patchW, patchH);
 			return bm;
-		} else {
+			}*/else {
 			// idea for 2 pages, combine one page together
 
 			// calculate the page
 			final int thePageToDraw = page * 2 - 1;
-			
+
 			// divide overall width into 2 parts
 			// left part
 			int leftPageWidth = pageW / 2;
 			// right part
 			int rightPageWidth = pageW - leftPageWidth;
 
-			// calculate zoom, we need to handle the zoom which happen between 2 pages
-			
-			// if patchX(offset) is not exceed the leftPageWidth means left page is still need to display
+			// calculate zoom, we need to handle the zoom which happen between 2
+			// pages
+
+			// if patchX(offset) is not exceed the leftPageWidth means left page
+			// is still need to display
 			// otherwise leftBitmapWidth will be negative
 			int leftBitmapWidth = Math.min(leftPageWidth, leftPageWidth
 					- patchX);
@@ -291,47 +310,83 @@ public class MuPDFCore {
 			// if leftBitmapWidth is negative then set it to zero
 			leftBitmapWidth = (leftBitmapWidth < 0) ? 0 : leftBitmapWidth;
 
-			// calculate the remaining space and make it for the rightBitmapWidth
+			// calculate the remaining space and make it for the
+			// rightBitmapWidth
 			int rightBitmapWidth = patchW - leftBitmapWidth;
 
 			Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
-			// if leftBitmapWidth > 0 means we still need to draw left page
-			if (leftBitmapWidth > 0) {
-				Log.e(tag, "draw left");
-				Bitmap leftBm = Bitmap.createBitmap(leftBitmapWidth, patchH,
-						Config.ARGB_8888);
-				gotoPage(thePageToDraw);
-				
-				// draw left page
-				drawPage(leftBm, leftPageWidth, pageH, patchX, patchY,
-						leftBitmapWidth, patchH);
-				
-				// left page start from  (0,0)
-				canvas.drawBitmap(leftBm, 0, 0, paint);
-				leftBm.recycle();
-			}
-			
-			// if rightBitmapWidth > 0 means we still need to draw left page
-			if (rightBitmapWidth > 0) {
-				Log.e(tag, "draw right");
-				Bitmap rightBm = Bitmap.createBitmap(rightBitmapWidth, patchH,
-						Config.ARGB_8888);
-				gotoPage(thePageToDraw + 1);
+			if (page == 0) {
+				if (rightBitmapWidth > 0) {
+					Bitmap rightBm = Bitmap.createBitmap(rightBitmapWidth,
+							patchH, Config.ARGB_8888);
+					gotoPage(page);
 
-				// calculate patchX for right
-				// if we only zoom to right page then leftBitmapWidth will = 0 and patchX for right is = 
-				// patchX - leftPageWidth. if we still render left page then we need to draw right page at the leftmost
-				int patchXRight = (leftBitmapWidth == 0) ? patchX
-						- leftPageWidth : 0;
-				
-				// draw right page
-				drawPage(rightBm, rightPageWidth, pageH, patchXRight, patchY,
-						rightBitmapWidth, patchH);
-				
-				// right page start at the end of left page
-				canvas.drawBitmap(rightBm, (float) leftBitmapWidth, 0, paint);
-				rightBm.recycle();
+					int patchXRight = (leftBitmapWidth == 0) ? patchX
+							- leftPageWidth : 0;
+					drawPage(rightBm, rightPageWidth, pageH, patchXRight,
+							patchY, rightBitmapWidth, patchH);
+					canvas.drawBitmap(rightBm, (float) leftBitmapWidth, 0,
+							paint);
+					rightBm.recycle();
+				}
+
+			} else if (numPages % 2 == 0 && page == numPages / 2) {
+				if (leftBitmapWidth > 0) {
+					Log.e(tag, "draw last page");
+					Bitmap leftBm = Bitmap.createBitmap(leftBitmapWidth,
+							patchH, Config.ARGB_8888);
+					gotoPage(thePageToDraw);
+
+					// draw left page
+					drawPage(leftBm, leftPageWidth, pageH, patchX, patchY,
+							leftBitmapWidth, patchH);
+
+					// left page start from (0,0)
+					canvas.drawBitmap(leftBm, 0, 0, paint);
+					leftBm.recycle();
+				}
+			} else {
+				// if leftBitmapWidth > 0 means we still need to draw left page
+				if (leftBitmapWidth > 0) {
+					Log.e(tag, "draw left");
+					Bitmap leftBm = Bitmap.createBitmap(leftBitmapWidth,
+							patchH, Config.ARGB_8888);
+					gotoPage(thePageToDraw);
+
+					// draw left page
+					drawPage(leftBm, leftPageWidth, pageH, patchX, patchY,
+							leftBitmapWidth, patchH);
+
+					// left page start from (0,0)
+					canvas.drawBitmap(leftBm, 0, 0, paint);
+					leftBm.recycle();
+				}
+
+				// if rightBitmapWidth > 0 means we still need to draw left page
+				if (rightBitmapWidth > 0) {
+					Log.e(tag, "draw right");
+					Bitmap rightBm = Bitmap.createBitmap(rightBitmapWidth,
+							patchH, Config.ARGB_8888);
+					gotoPage(thePageToDraw + 1);
+
+					// calculate patchX for right
+					// if we only zoom to right page then leftBitmapWidth will =
+					// 0 and patchX for right is =
+					// patchX - leftPageWidth. if we still render left page then
+					// we need to draw right page at the leftmost
+					int patchXRight = (leftBitmapWidth == 0) ? patchX
+							- leftPageWidth : 0;
+
+					// draw right page
+					drawPage(rightBm, rightPageWidth, pageH, patchXRight,
+							patchY, rightBitmapWidth, patchH);
+
+					// right page start at the end of left page
+					canvas.drawBitmap(rightBm, (float) leftBitmapWidth, 0,
+							paint);
+					rightBm.recycle();
+				}
 			}
 		}
 
@@ -359,11 +414,11 @@ public class MuPDFCore {
 		Log.e(tag, "patchW : " + patchW);
 		Log.e(tag, "patchH : " + patchH);
 		Log.e(tag, "page : " + page);
-		//if (numDisplayPages == 1) {
+		// if (numDisplayPages == 1) {
 
-			updatePageInternal(bm, page, pageW, pageH, patchX, patchY, patchW,
-					patchH);
-			return bm;
+		updatePageInternal(bm, page, pageW, pageH, patchX, patchY, patchW,
+				patchH);
+		return bm;
 		/*} else {
 			Canvas canvas = new Canvas(bm);
 			canvas.drawColor(Color.TRANSPARENT);
@@ -521,4 +576,5 @@ public class MuPDFCore {
 	public synchronized void save() {
 		saveInternal();
 	}
+
 }
